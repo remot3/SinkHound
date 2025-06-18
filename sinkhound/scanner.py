@@ -77,14 +77,17 @@ def scan_repository(
 ) -> None:
     repo = clone_repo(repo_url, branch)
     cfg = SinkConfig(sink_file)
+    COLOR_RESET = "\033[0m"
+    COLOR_COMMIT = "\033[36m"
+    COLOR_LINE = "\033[33m"
+
     for commit in iter_commits(repo, branch):
 
         matches = scan_commit(commit, cfg.rules, include_ext=include_ext)
 
         if matches:
-            print(f"Commit {commit.hexsha}: {commit.summary}")
+            print(f"{COLOR_COMMIT}Commit {commit.hexsha}: {commit.summary}{COLOR_RESET}")
             for m in matches:
-                print(
-                    f"  {m.path} -> {m.description} (risk {m.risk})\n    {m.line}"
-                )
+                print(f"  {m.path} -> {m.description}")
+                print(f"    {COLOR_LINE}{m.line}{COLOR_RESET}")
 
