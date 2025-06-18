@@ -1,0 +1,7 @@
+sinks:
+  - pattern: "unserialize\\("
+    description: "Usage of unserialize function"
+    risk: 5
+  - pattern: "eval\\("
+    description: "Usage of eval function"
+    risk: 10
