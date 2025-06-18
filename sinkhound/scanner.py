@@ -44,7 +44,9 @@ def scan_commit(commit, rules: List[SinkRule], ignore_ext: Optional[List[str]] =
         return matches
     diff = parents[0].diff(commit, create_patch=True)
     for diff_item in diff:
-        if ignore_ext and any(diff_item.b_path.endswith(ext) for ext in ignore_ext):
+        if ignore_ext and diff_item.b_path and any(
+            diff_item.b_path.endswith(ext) for ext in ignore_ext
+        ):
             continue
         for line in diff_item.diff.decode("utf-8", errors="ignore").splitlines():
             if not line.startswith("+"):
