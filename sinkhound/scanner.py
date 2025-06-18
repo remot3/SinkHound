@@ -3,17 +3,24 @@
 from __future__ import annotations
 
 import re
-import subprocess
 import tempfile
 from pathlib import Path
 from typing import Iterable, List, Optional
 
 from git import Repo
 
+
+def _log(message: str, enabled: bool) -> None:
+    """Print a log message when logging is enabled."""
+    if enabled:
+        print(message)
+
 from .sinks import SinkConfig, SinkRule
 
 
-def clone_repo(url: str, branch: str) -> Repo:
+def clone_repo(url: str, branch: str, log_steps: bool) -> Repo:
+    """Clone the repository and return the Repo object."""
+    _log(f"Cloning repository {url} (branch {branch})", log_steps)
     temp_dir = tempfile.mkdtemp(prefix="sinkhound-")
     repo = Repo.clone_from(url, temp_dir, branch=branch)
     return repo
@@ -73,19 +80,29 @@ def scan_repository(
     branch: str,
     sink_file: Path,
     include_ext: Optional[List[str]] = None,
+    silent: bool = False,
 
 ) -> None:
-    repo = clone_repo(repo_url, branch)
+    log_steps = not silent
+    repo = clone_repo(repo_url, branch, log_steps)
+    _log(f"Loading sinks from {sink_file}", log_steps)
     cfg = SinkConfig(sink_file)
     COLOR_RESET = "\033[0m"
     COLOR_COMMIT = "\033[36m"
     COLOR_LINE = "\033[33m"
 
+    printed_output = False
     for commit in iter_commits(repo, branch):
+        if log_steps and not printed_output:
+            _log(f"Scanning commit {commit.hexsha}", log_steps)
 
         matches = scan_commit(commit, cfg.rules, include_ext=include_ext)
 
         if matches:
+            if log_steps and not printed_output:
+                # separate progress logs from results
+                printed_output = True
+                print("")
             print(f"{COLOR_COMMIT}Commit {commit.hexsha}: {commit.summary}{COLOR_RESET}")
             for m in matches:
                 print(f"  {m.path} -> {m.description}")

@@ -21,6 +21,12 @@ def main(argv=None) -> None:
         help="Comma separated list of extensions to scan (e.g. php,yaml)",
 
     )
+    scan.add_argument(
+        "-s",
+        "--silent",
+        action="store_true",
+        help="Suppress progress logging",
+    )
 
     args = parser.parse_args(argv)
 
@@ -38,6 +44,7 @@ def main(argv=None) -> None:
             args.branch,
             args.sinks,
             include_ext=include_ext,
+            silent=args.silent,
         )
 
     else:
