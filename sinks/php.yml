@@ -2,6 +2,15 @@ sinks:
   - pattern: "unserialize\\("
     description: "Usage of unserialize function"
     risk: 5
+  - pattern: "serialize\\("
+    description: "Usage of serialize function"
+    risk: 3
   - pattern: "eval\\("
     description: "Usage of eval function"
     risk: 10
+  - pattern: "(?:include|include_once|require|require_once)\\s*\\("
+    description: "File inclusion functions"
+    risk: 7
+  - pattern: "(?:curl_exec|curl_multi_exec|file_get_contents|fopen|fsockopen|pfsockopen|stream_socket_client)\\("
+    description: "Potential SSRF through HTTP requests"
+    risk: 8
