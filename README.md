@@ -8,6 +8,7 @@ SinkHound is a security focused tool that scans the commit history of a Git repo
 - **Customizable rule sets** – define sinks in YAML with descriptions and risk scores
 - **Human-readable output** – shows the commit, sink description and offending line
 - **File extension filtering** – only process files with certain extensions using `--include-ext`
+- **Commit range limiting** – scan only the last N commits using `--commits`
 
 - **Multi-format reporting** – console output today, JSON/HTML in the future
 
@@ -20,6 +21,9 @@ pip install .
 # run a scan using the installed `sinkhound` command
 
 sinkhound scan --sinks sinks/php.yml --branch main --repo https://github.com/codingo/NoSQLMap --include-ext php,yaml
+
+# limit to last 100 commits
+sinkhound scan --sinks sinks/php.yml --branch main --repo https://github.com/codingo/NoSQLMap --include-ext php,yaml -c 100
 
 ```
 
