@@ -12,8 +12,11 @@ SinkHound is a security focused tool that scans the commit history of a Git repo
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
-python -m sinkhound.cli scan --sinks sinks/php.yml --branch main --repo https://github.com/codingo/NoSQLMap
+# install the command line interface
+pip install .
+
+# run a scan using the installed `sinkhound` command
+sinkhound scan --sinks sinks/php.yml --branch main --repo https://github.com/codingo/NoSQLMap
 ```
 
 The command above will clone the repository, iterate over its commits and report any lines matching the sink rules defined in `sinks/php.yml`.
