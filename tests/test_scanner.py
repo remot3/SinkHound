@@ -4,7 +4,7 @@ import tempfile
 from git import Repo
 
 from sinkhound.sinks import SinkConfig
-from sinkhound.scanner import iter_commits, scan_commit
+from sinkhound.scanner import iter_commits, scan_commit, ScanMatch
 
 
 def create_repo() -> Path:
@@ -39,11 +39,21 @@ def test_scan_detects_eval():
     found = False
     for commit in commits:
         matches = scan_commit(commit, cfg.rules)
-        if matches:
+        if any(m.description == "Usage of eval function" for m in matches):
             found = True
             break
     assert found
 
+
+
+def test_ignore_extension_skips_file():
+    repo_path = create_repo()
+    repo = Repo(repo_path)
+    cfg = SinkConfig(Path("sinks/php.yml"))
+    commits = list(iter_commits(repo, "master"))
+    target_commit = commits[-1]
+    matches = scan_commit(target_commit, cfg.rules, ignore_ext=[".py"])
+    assert matches == []
 
 def test_dynamic_file_read_flagged():
     repo_path = create_repo_file_reads()
@@ -53,4 +63,5 @@ def test_dynamic_file_read_flagged():
     results = [scan_commit(c, cfg.rules) for c in commits]
     assert not results[0]
     assert results[1]
+
 
