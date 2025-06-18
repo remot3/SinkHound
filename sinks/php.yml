@@ -11,6 +11,6 @@ sinks:
   - pattern: "(?:include|include_once|require|require_once)\\s*\\("
     description: "File inclusion functions"
     risk: 7
-  - pattern: "(?:curl_exec|curl_multi_exec|file_get_contents|fopen|fsockopen|pfsockopen|stream_socket_client)\\("
-    description: "Potential SSRF through HTTP requests"
+  - pattern: "(?:curl_exec|curl_multi_exec|file_get_contents|fopen|fsockopen|pfsockopen|stream_socket_client)\\s*\\(\\s*(?!['\"'][^$'\"']*['\"'])"
+    description: "Potential SSRF when variable input is used"
     risk: 8
