@@ -15,14 +15,17 @@ def main(argv=None) -> None:
     scan.add_argument("--branch", required=True, help="Branch to scan")
     scan.add_argument("--repo", required=True, help="Repository URL")
     scan.add_argument(
+
         "--include-ext",
         default="",
         help="Comma separated list of extensions to scan (e.g. php,yaml)",
+
     )
 
     args = parser.parse_args(argv)
 
     if args.command == "scan":
+
         include_ext = []
         if args.include_ext:
             include_ext = [
@@ -36,6 +39,7 @@ def main(argv=None) -> None:
             args.sinks,
             include_ext=include_ext,
         )
+
     else:
         parser.print_help()
 

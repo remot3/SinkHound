@@ -19,6 +19,18 @@ def create_repo() -> Path:
     return tmp
 
 
+def create_repo_file_reads() -> Path:
+    tmp = Path(tempfile.mkdtemp())
+    repo = Repo.init(tmp)
+    (tmp / "a.php").write_text('<?php\n$content = file_get_contents("test.txt");\n')
+    repo.index.add(["a.php"])
+    repo.index.commit("initial commit")
+    (tmp / "a.php").write_text('<?php\n$content = file_get_contents($file);\n')
+    repo.index.add(["a.php"])
+    repo.index.commit("use variable input")
+    return tmp
+
+
 def test_scan_detects_eval():
     repo_path = create_repo()
     repo = Repo(repo_path)
@@ -33,12 +45,27 @@ def test_scan_detects_eval():
     assert found
 
 
+
 def test_include_extension_filters_files():
+
     repo_path = create_repo()
     repo = Repo(repo_path)
     cfg = SinkConfig(Path("sinks/php.yml"))
     commits = list(iter_commits(repo, "master"))
     target_commit = commits[-1]
+
     matches = scan_commit(target_commit, cfg.rules, include_ext=[".js"])
     assert matches == []
+
+
+
+def test_dynamic_file_read_flagged():
+    repo_path = create_repo_file_reads()
+    repo = Repo(repo_path)
+    cfg = SinkConfig(Path("sinks/php.yml"))
+    commits = list(iter_commits(repo, "master"))
+    results = [scan_commit(c, cfg.rules) for c in commits]
+    assert not results[0]
+    assert results[1]
+
 
