@@ -31,6 +31,18 @@ def create_repo_file_reads() -> Path:
     return tmp
 
 
+def create_repo_with_deletion() -> Path:
+    tmp = Path(tempfile.mkdtemp())
+    repo = Repo.init(tmp)
+    (tmp / "a.php").write_text("<?php\necho 'hello';\n")
+    repo.index.add(["a.php"])
+    repo.index.commit("initial commit")
+    (tmp / "a.php").unlink()
+    repo.index.remove(["a.php"])
+    repo.index.commit("remove file")
+    return tmp
+
+
 def test_scan_detects_eval():
     repo_path = create_repo()
     repo = Repo(repo_path)
@@ -67,5 +79,16 @@ def test_dynamic_file_read_flagged():
     results = [scan_commit(c, cfg.rules) for c in commits]
     assert not results[0]
     assert results[1]
+
+
+def test_deleted_files_are_ignored_with_include_ext():
+    repo_path = create_repo_with_deletion()
+    repo = Repo(repo_path)
+    cfg = SinkConfig(Path("sinks/php.yml"))
+    commits = list(iter_commits(repo, "master"))
+    target_commit = commits[-1]
+
+    matches = scan_commit(target_commit, cfg.rules, include_ext=[".php"])
+    assert matches == []
 
 
