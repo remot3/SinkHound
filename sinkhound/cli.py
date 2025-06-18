@@ -14,11 +14,28 @@ def main(argv=None) -> None:
     scan.add_argument("--sinks", required=True, type=Path, help="YAML file with sink definitions")
     scan.add_argument("--branch", required=True, help="Branch to scan")
     scan.add_argument("--repo", required=True, help="Repository URL")
+    scan.add_argument(
+        "--include-ext",
+        default="",
+        help="Comma separated list of extensions to scan (e.g. php,yaml)",
+    )
 
     args = parser.parse_args(argv)
 
     if args.command == "scan":
-        scan_repository(args.repo, args.branch, args.sinks)
+        include_ext = []
+        if args.include_ext:
+            include_ext = [
+                ext if ext.startswith(".") else f".{ext}"
+                for ext in args.include_ext.split(",")
+                if ext
+            ]
+        scan_repository(
+            args.repo,
+            args.branch,
+            args.sinks,
+            include_ext=include_ext,
+        )
     else:
         parser.print_help()
 
