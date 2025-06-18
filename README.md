@@ -7,7 +7,8 @@ SinkHound is a security focused tool that scans the commit history of a Git repo
 - **Commit-aware sink tracing** – scans added lines in each commit
 - **Customizable rule sets** – define sinks in YAML with descriptions and risk scores
 - **Human-readable output** – shows the commit, sink description and offending line
-- **File extension filtering** – skip scanning specific extensions with `--ignore-ext`
+- **File extension filtering** – only process files with certain extensions using `--include-ext`
+
 - **Multi-format reporting** – console output today, JSON/HTML in the future
 
 ## Quick start
@@ -17,7 +18,9 @@ SinkHound is a security focused tool that scans the commit history of a Git repo
 pip install .
 
 # run a scan using the installed `sinkhound` command
-sinkhound scan --sinks sinks/php.yml --branch main --repo https://github.com/codingo/NoSQLMap --ignore-ext .js
+
+sinkhound scan --sinks sinks/php.yml --branch main --repo https://github.com/codingo/NoSQLMap --include-ext php,yaml
+
 ```
 
 The command above will clone the repository, iterate over its commits and report any lines matching the sink rules defined in `sinks/php.yml`.

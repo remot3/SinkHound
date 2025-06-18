@@ -46,14 +46,18 @@ def test_scan_detects_eval():
 
 
 
-def test_ignore_extension_skips_file():
+def test_include_extension_filters_files():
+
     repo_path = create_repo()
     repo = Repo(repo_path)
     cfg = SinkConfig(Path("sinks/php.yml"))
     commits = list(iter_commits(repo, "master"))
     target_commit = commits[-1]
-    matches = scan_commit(target_commit, cfg.rules, ignore_ext=[".py"])
+
+    matches = scan_commit(target_commit, cfg.rules, include_ext=[".js"])
     assert matches == []
+
+
 
 def test_dynamic_file_read_flagged():
     repo_path = create_repo_file_reads()

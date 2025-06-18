@@ -36,7 +36,9 @@ class ScanMatch:
     risk: int
 
 
-def scan_commit(commit, rules: List[SinkRule], ignore_ext: Optional[List[str]] = None) -> List[ScanMatch]:
+
+def scan_commit(commit, rules: List[SinkRule], include_ext: Optional[List[str]] = None) -> List[ScanMatch]:
+
     """Scan a commit and return matching lines."""
     matches: List[ScanMatch] = []
     parents = commit.parents
@@ -44,9 +46,9 @@ def scan_commit(commit, rules: List[SinkRule], ignore_ext: Optional[List[str]] =
         return matches
     diff = parents[0].diff(commit, create_patch=True)
     for diff_item in diff:
-        if ignore_ext and diff_item.b_path and any(
-            diff_item.b_path.endswith(ext) for ext in ignore_ext
-        ):
+
+        if include_ext and not any(diff_item.b_path.endswith(ext) for ext in include_ext):
+
             continue
         for line in diff_item.diff.decode("utf-8", errors="ignore").splitlines():
             if not line.startswith("+"):
@@ -65,12 +67,19 @@ def scan_commit(commit, rules: List[SinkRule], ignore_ext: Optional[List[str]] =
 
 
 def scan_repository(
-    repo_url: str, branch: str, sink_file: Path, ignore_ext: Optional[List[str]] = None
+
+    repo_url: str,
+    branch: str,
+    sink_file: Path,
+    include_ext: Optional[List[str]] = None,
+
 ) -> None:
     repo = clone_repo(repo_url, branch)
     cfg = SinkConfig(sink_file)
     for commit in iter_commits(repo, branch):
-        matches = scan_commit(commit, cfg.rules, ignore_ext=ignore_ext)
+
+        matches = scan_commit(commit, cfg.rules, include_ext=include_ext)
+
         if matches:
             print(f"Commit {commit.hexsha}: {commit.summary}")
             for m in matches:
