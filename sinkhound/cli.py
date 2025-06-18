@@ -7,25 +7,34 @@ from .scanner import scan_repository
 
 
 def main(argv=None) -> None:
-    parser = argparse.ArgumentParser(description="Scan git history for dangerous patterns")
+    parser = argparse.ArgumentParser(
+        description="Scan git history for dangerous patterns"
+    )
     subparsers = parser.add_subparsers(dest="command")
 
     scan = subparsers.add_parser("scan", help="Scan a repository")
-    scan.add_argument("--sinks", required=True, type=Path, help="YAML file with sink definitions")
+    scan.add_argument(
+        "--sinks", required=True, type=Path, help="YAML file with sink definitions"
+    )
     scan.add_argument("--branch", required=True, help="Branch to scan")
     scan.add_argument("--repo", required=True, help="Repository URL")
     scan.add_argument(
-
         "--include-ext",
         default="",
         help="Comma separated list of extensions to scan (e.g. php,yaml)",
-
     )
     scan.add_argument(
         "-s",
         "--silent",
         action="store_true",
         help="Suppress progress logging",
+    )
+    scan.add_argument(
+        "-c",
+        "--commits",
+        type=int,
+        default=None,
+        help="Limit the number of commits to scan",
     )
 
     args = parser.parse_args(argv)
@@ -45,6 +54,7 @@ def main(argv=None) -> None:
             args.sinks,
             include_ext=include_ext,
             silent=args.silent,
+            commit_limit=args.commits,
         )
 
     else:
@@ -53,4 +63,3 @@ def main(argv=None) -> None:
 
 if __name__ == "__main__":
     main()
-

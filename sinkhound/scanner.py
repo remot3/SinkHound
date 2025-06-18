@@ -15,6 +15,7 @@ def _log(message: str, enabled: bool) -> None:
     if enabled:
         print(message)
 
+
 from .sinks import SinkConfig, SinkRule
 
 
@@ -26,8 +27,14 @@ def clone_repo(url: str, branch: str, log_steps: bool) -> Repo:
     return repo
 
 
-def iter_commits(repo: Repo, branch: str) -> Iterable:
-    return repo.iter_commits(branch, reverse=True)
+from itertools import islice
+
+
+def iter_commits(repo: Repo, branch: str, max_count: Optional[int] = None) -> Iterable:
+    commits = repo.iter_commits(branch, reverse=True)
+    if max_count is not None and max_count > 0:
+        commits = islice(commits, max_count)
+    return commits
 
 
 from dataclasses import dataclass
@@ -43,9 +50,9 @@ class ScanMatch:
     risk: int
 
 
-
-def scan_commit(commit, rules: List[SinkRule], include_ext: Optional[List[str]] = None) -> List[ScanMatch]:
-
+def scan_commit(
+    commit, rules: List[SinkRule], include_ext: Optional[List[str]] = None
+) -> List[ScanMatch]:
     """Scan a commit and return matching lines."""
     matches: List[ScanMatch] = []
     parents = commit.parents
@@ -75,13 +82,12 @@ def scan_commit(commit, rules: List[SinkRule], include_ext: Optional[List[str]] 
 
 
 def scan_repository(
-
     repo_url: str,
     branch: str,
     sink_file: Path,
     include_ext: Optional[List[str]] = None,
     silent: bool = False,
-
+    commit_limit: Optional[int] = None,
 ) -> None:
     log_steps = not silent
     repo = clone_repo(repo_url, branch, log_steps)
@@ -92,7 +98,7 @@ def scan_repository(
     COLOR_LINE = "\033[33m"
 
     printed_output = False
-    for commit in iter_commits(repo, branch):
+    for commit in iter_commits(repo, branch, commit_limit):
         if log_steps and not printed_output:
             _log(f"Scanning commit {commit.hexsha}", log_steps)
 
@@ -103,8 +109,9 @@ def scan_repository(
                 # separate progress logs from results
                 printed_output = True
                 print("")
-            print(f"{COLOR_COMMIT}Commit {commit.hexsha}: {commit.summary}{COLOR_RESET}")
+            print(
+                f"{COLOR_COMMIT}Commit {commit.hexsha}: {commit.summary}{COLOR_RESET}"
+            )
             for m in matches:
                 print(f"  {m.path} -> {m.description}")
                 print(f"    {COLOR_LINE}{m.line}{COLOR_RESET}")
-

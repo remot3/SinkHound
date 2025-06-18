@@ -25,7 +25,7 @@ def create_repo_file_reads() -> Path:
     (tmp / "a.php").write_text('<?php\n$content = file_get_contents("test.txt");\n')
     repo.index.add(["a.php"])
     repo.index.commit("initial commit")
-    (tmp / "a.php").write_text('<?php\n$content = file_get_contents($file);\n')
+    (tmp / "a.php").write_text("<?php\n$content = file_get_contents($file);\n")
     repo.index.add(["a.php"])
     repo.index.commit("use variable input")
     return tmp
@@ -57,7 +57,6 @@ def test_scan_detects_eval():
     assert found
 
 
-
 def test_include_extension_filters_files():
 
     repo_path = create_repo()
@@ -68,7 +67,6 @@ def test_include_extension_filters_files():
 
     matches = scan_commit(target_commit, cfg.rules, include_ext=[".js"])
     assert matches == []
-
 
 
 def test_dynamic_file_read_flagged():
@@ -92,3 +90,8 @@ def test_deleted_files_are_ignored_with_include_ext():
     assert matches == []
 
 
+def test_iter_commits_respects_limit():
+    repo_path = create_repo()
+    repo = Repo(repo_path)
+    commits = list(iter_commits(repo, "master", max_count=1))
+    assert len(commits) == 1
