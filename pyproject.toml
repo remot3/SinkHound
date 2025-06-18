@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sinkhound"
+version = "0.1.0"
+readme = "README.md"
+dependencies = [
+    "GitPython>=3.1",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+sinkhound = "sinkhound.cli:main"
+
