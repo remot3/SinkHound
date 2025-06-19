@@ -14,3 +14,9 @@ sinks:
   - pattern: "(?:curl_exec|curl_multi_exec|file_get_contents|fopen|fsockopen|pfsockopen|stream_socket_client)\\s*\\(\\s*(?!['\"'][^$'\"']*['\"'])"
     description: "Potential SSRF when variable input is used"
     risk: 8
+  - pattern: "(?:include|include_once|require|require_once)\\s*\\(\\s*(?!['\"'][^$'\"']*['\"'])"
+    description: "Dynamic file inclusion"
+    risk: 9
+  - pattern: "(?:exec|system|shell_exec|passthru|popen|pcntl_exec)\\s*\\(\\s*(?!['\"'][^$'\"']*['\"'])"
+    description: "Command execution with variable input"
+    risk: 10
